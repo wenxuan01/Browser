@@ -6,9 +6,6 @@ import javax.swing.*;
 public class Main extends JFrame {
 
     private JTabbedPane contentPane;
-    private JButton settingsBtn;
-
-    private JScrollPane main;
 
     public Main() {
         initComponents();
@@ -29,8 +26,6 @@ public class Main extends JFrame {
         contentPane = new JTabbedPane();
 
         setContentPane(contentPane);
-        JPanel top = new JPanel();
-        settingsBtn = new JButton();
 
         GridBagLayout gbl = new GridBagLayout();
         gbl.columnWidths = new int[]{100, 100, 100, 100, 100, 100, 100, 100}; // SUM = 800
@@ -43,12 +38,12 @@ public class Main extends JFrame {
         gbc_top.gridwidth = 2;
         gbc_top.weightx = 0;
         gbc_top.weighty = 0;
-        top.setLayout(null);
-        contentPane.add(top, gbc_top);
+       // top.setLayout(null);
 
     }
 
     public void newTab() {
+        JPanel page = new JPanel(new BorderLayout());
         JScrollPane main = new JScrollPane();        
         JPanel top = new JPanel();
         GridBagLayout gbl = new GridBagLayout();
@@ -66,5 +61,8 @@ public class Main extends JFrame {
         gbc_top.weighty = 0;
         top.setLayout(null);
 
+        page.add(top,BorderLayout.NORTH);
+        page.add(main,BorderLayout.SOUTH);
+        contentPane.addTab("New Tab",page);
     }
 }
