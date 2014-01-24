@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="image4j-example" default="all" basedir=".">
+  
+  <property name="lib.dir" value="${basedir}/.."/>
+  
+  <target name="clean">
+    <!-- clean class files -->
+    <delete dir="${basedir}/build/classes"/>
+    
+    <!-- clean jar -->
+    <delete file="${basedir}/dist" includes="*.jar"/>
+    
+    <!-- clean javadoc -->
+    <delete dir="${basedir}/dist/docs"/>
+    
+  </target>
+  
+  <target name="build">
+    
+    <!-- prepare build dir -->
+    <mkdir dir="${basedir}/build/classes"/>
+    
+    <!-- compile to build dir -->
+    <javac srcdir="${basedir}/src/java" classpath="${lib.dir}/image4j.jar" destdir="${basedir}/build/classes"/>
+    
+    <!-- prepare dist dir -->
+    <mkdir dir="${basedir}/dist"/>
+    
+    <!-- jar -->
+    <jar file="${basedir}/dist/image4j-example.jar">
+      <manifest>
+        <attribute name="Built-By" value="Apache Ant"/>
+        <attribute name="Main-Class" value="net.sf.image4j.example.Test"/>
+        <attribute name="Class-Path" value="../image4j.jar"/>
+      </manifest>
+      <fileset dir="${basedir}/build/classes"/>
+    </jar>
+    
+    <!-- copy misc files -->
+    <copy file="${basedir}/src/resources/input.ico" tofile="${basedir}/dist/input.ico"/>
+    <copy file="${basedir}/LICENSE.TXT" todir="${basedir}/dist"/>
+        
+    <!-- prepare javadoc dir -->
+    <mkdir dir="${basedir}/dist/docs"/>
+    
+    <!-- generate javadoc to javadoc dir -->
+    <javadoc classpath="${lib.dir}/image4j.jar"
+             destdir="${basedir}/dist/docs"
+             windowtitle="image4j - Example">
+      <fileset dir="${basedir}/src/java" includes="**/*.java"/>
+    </javadoc>
+  </target>
+</project>

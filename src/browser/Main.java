@@ -2,12 +2,10 @@ package browser;
 
 import java.awt.*;
 import javax.swing.*;
-import org.jsoup.nodes.Document;
 
 public class Main extends JFrame {
 
     private JTabbedPane contentPane;
-    private int index = -1;
     private Browser browser;
 
     public Main() {
@@ -29,16 +27,30 @@ public class Main extends JFrame {
     private void initComponents() {
         contentPane = new JTabbedPane();
         setContentPane(contentPane);
-        
+
         newTab();
+        
+        /*new Thread(){
+            //TODO: Updating titles and other stuff
+            public void run(){
+                for(; ; ){
+                    for(int i = 0; i < contentPane.getTabCount(); i++) contentPane.setTitleAt(i, ((Tab)contentPane.getComponentAt(i)).);
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+                }                
+            }
+        }.start();*/
 
     }
 
-    public void newTab() {        
-  
-        contentPane.addTab("New Tab",new Tab());
-        
+    public void newTab() {
+        Tab t = new Tab();
+        contentPane.addTab("New Tab", t);
+        contentPane.setTabComponentAt(t.getIndex(),t.tabComp);
     }
     
-   
+
 }
