@@ -1,0 +1,5 @@
+Save a webpage: S
+new tab: t
+print: p
+back: left-arrow
+forward: right-arrow

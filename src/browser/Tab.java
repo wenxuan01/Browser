@@ -78,6 +78,7 @@ public class Tab extends JPanel {
         this.add(top, BorderLayout.NORTH);
         this.add(main, BorderLayout.CENTER);
         this.i = index;
+        
     }
 
     public int getIndex() {
@@ -88,7 +89,6 @@ public class Tab extends JPanel {
         Document doc;
         ImageIcon icon;
         
-        //Clear jlabel
         tabComp.setText("");
         tabComp.setIcon(null);
         
