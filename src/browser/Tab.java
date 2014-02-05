@@ -3,6 +3,7 @@ package browser;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -16,21 +17,18 @@ import net.sf.image4j.codec.ico.ICODecoder;
 
 public class Tab extends JPanel {
 
-    static int index = -1;
-    int i;
     public static List<String> history = new ArrayList<>();
     public JLabel tabComp = new JLabel();
+    final JTextField url_ = new JTextField();
 
     public Tab() {
         tabComp.setText("New Tab");
-        index++;
         setLayout(new BorderLayout());
 
         JScrollPane main = new JScrollPane();
         JPanel top = new JPanel();
-        final JTextField url = new JTextField();
 
-        url.addKeyListener(new KeyListener() {
+        url_.addKeyListener(new KeyListener() {
 
             @Override
             public void keyTyped(KeyEvent ke) {
@@ -39,8 +37,19 @@ public class Tab extends JPanel {
             @Override
             public void keyPressed(KeyEvent ke) {
                 if (ke.getKeyCode() == 10) {
-                    boolean connected = update(url.getText());
-                    url.setText("");
+                    String url = url_.getText();
+                    UrlValidator validator = new UrlValidator();
+                    if (validator.isValid(url) || validator.isValid("http://" + url) || validator.isValid("http://www." + url)) {
+                        if (!url.startsWith("www.")) {
+                            url = "www." + url;
+                        }
+                        if (!url.startsWith("http://")) {
+                            url = "http://" + url;
+                        }
+                    } else {
+                        url = "http://www.google.com/search?q=" + url;
+                    }
+                    boolean connected = update(url);
                 }
             }
 
@@ -51,8 +60,8 @@ public class Tab extends JPanel {
 
         top.setLayout(new BorderLayout());
         top.setPreferredSize(new Dimension(500, 30));
-        url.setPreferredSize(new Dimension(200, 20));
-        top.add(url, BorderLayout.CENTER);
+        url_.setPreferredSize(new Dimension(200, 20));
+        top.add(url_, BorderLayout.CENTER);
         GridBagLayout gbl = new GridBagLayout();
         gbl.columnWidths = new int[800];
         gbl.rowHeights = new int[600];
@@ -67,47 +76,35 @@ public class Tab extends JPanel {
 
         main.setViewportView(html);
         /*
-         GridBagConstraints gbc_top = new GridBagConstraints();
-         gbc_top.gridx = 0;
-         gbc_top.gridy = 0;
-         gbc_top.gridheight = 2;
-         gbc_top.gridwidth = 8;
-         gbc_top.weightx = 0;
-         gbc_top.weighty = 0;*/
+        GridBagConstraints gbc_top = new GridBagConstraints();
+        gbc_top.gridx = 0;
+        gbc_top.gridy = 0;
+        gbc_top.gridheight = 2;
+        gbc_top.gridwidth = 8;
+        gbc_top.weightx = 0;
+        gbc_top.weighty = 0;*/
 
         this.add(top, BorderLayout.NORTH);
         this.add(main, BorderLayout.CENTER);
-        this.i = index;
-        
-    }
 
-    public int getIndex() {
-        return this.i;
     }
 
     private boolean update(String url) {
         Document doc;
         ImageIcon icon;
-        
-        tabComp.setText("");
-        tabComp.setIcon(null);
-        
-        UrlValidator validator = new UrlValidator();
-        if (validator.isValid(url) || validator.isValid("http://" + url) || validator.isValid("http://www." + url)) {
-            if (!url.startsWith("http://")) {
-                url = "http://" + url;
-            }            
-        } else {
-            url = "http://www.google.com/#q=" + url;
-        }
+
+        tabComp.setText("Connecting...");
+        tabComp.setIcon(Main.icons.get("Loading_Animation"));
 
         history.add(url);
         try {
             System.out.println("Attempting to connect to " + url);
-            doc = Jsoup.connect(url).userAgent("Mozilla").get();
+            doc = Jsoup.connect(url).userAgent("Mozilla").timeout(10 * 1000).get();
             System.out.println("Connected to " + url);
         } catch (IOException e) {
+            System.err.println(e);
             System.out.println("Failed to connect to " + url);
+            System.out.println();
             return false;
         }
 
@@ -121,7 +118,7 @@ public class Tab extends JPanel {
                 iconurl = doc.head().select("link[href~=.*\\.(ico|png)]").first().attr("abs:href");
             } catch (NullPointerException ex) {
                 iconurl = doc.baseUri() + "/favicon.ico"; // Unreliable, used as last resort
-                
+
             }
         }
 
@@ -132,17 +129,21 @@ public class Tab extends JPanel {
                 icon = new ImageIcon(ICODecoder.read(new URL(iconurl).openStream()).get(0));
                 tabComp.setIcon(icon);
             } catch (IOException ex) {
+                System.err.println(ex);
                 System.out.println("Failed to parse icon from " + iconurl);
             }
         } else if (iconurl.endsWith(".png")) {
             try {
-                icon = new ImageIcon(ImageIO.read(new URL(iconurl).openStream()));
+                BufferedImage b = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g = b.createGraphics();
+                g.drawImage(ImageIO.read(new URL(iconurl).openStream()), 0, 0, b.getWidth(), b.getHeight(), this);
+                icon = new ImageIcon(b);
                 tabComp.setIcon(icon);
             } catch (IOException ex) {
                 System.out.println("Failed to parse icon from " + iconurl);
             }
         }
-        
+        System.out.println();
         return true;
     }
 }
